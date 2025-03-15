@@ -1,4 +1,5 @@
 name: Test JMeter on GitHub Action
+
 on:
   workflow_dispatch:
     inputs:
@@ -14,20 +15,37 @@ on:
         required: true
         description: 'Enter loop count'
         default: '10'
+
 jobs:
   run_jmeter_test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-      - name: Run JMeter Action on a Test
+      - name: Ensure JMX File Exists
+        run: |
+          if [ ! -f $GITHUB_WORKSPACE/PerformanceScript.jmx ]; then
+            echo "❌ Error: PerformanceScript.jmx file not found!"
+            exit 1
+          fi
+
+      - name: Run JMeter Performance Test
         uses: rbhadti94/apache-jmeter-action@v0.5.0
         with:
-          testFilePath: ./PerformanceScript.jmx
+          testFilePath: PerformanceScript.jmx
           outputReportsFolder: ./reports/
           args: "-Juser_count=${{ github.event.inputs.virtual_user }} -Jramp_up_time=${{ github.event.inputs.ramp_up_time }} -Jloop_count=${{ github.event.inputs.loop_count }}"
+        continue-on-error: false
 
-      - name: Upload JMeter results
+      - name: Verify Report Generation
+        run: |
+          if [ ! -d "reports" ] || [ -z "$(ls -A reports)" ]; then
+            echo "❌ Error: No reports generated!"
+            exit 1
+          fi
+
+      - name: Upload JMeter Results
         uses: actions/upload-artifact@v4
         with:
           name: jmeter-test-results
