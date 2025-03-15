@@ -7,7 +7,7 @@ on:
       required: true
       description: Enter virtual user count
       default: '10'
-    ramp_up_tine:
+    ramp_up_time:
       required: true
       description: Enter ramp up time
       default: '10'
@@ -25,7 +25,7 @@ jobs:
       with:
         testFilePath: PerformanceScript.jmx
         outputReportsFolder: reports/
-        args: "-Juser_count=${{ github.action.input.virtual_user }} -Juser_count=${{ github.action.input.virtual_user }} -Juser_count=${{ github.action.input.virtual_user }}"
+        args: "-Juser_count=${{ github.action.input.virtual_user }} -Jramp_up_time=${{ github.action.input.virtual_user }} -Jloop_count=${{ github.action.input.virtual_user }}"
     - uses: action/upload-artifact@3.1.2
       with:
           name: jmeter-test-results
